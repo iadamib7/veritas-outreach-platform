@@ -1,0 +1,48 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+}
+
+model School {
+  id            Int       @id @default(autoincrement())
+  name          String
+  region        String
+  contact       String
+  status        String
+  studentsCount Int       @default(0)
+  lastContacted DateTime
+  createdAt     DateTime  @default(now())
+
+  students      Student[]
+  tasks         Task[]
+}
+
+model Student {
+  id              Int      @id @default(autoincrement())
+  name            String
+  schoolName      String
+  program         String
+  attendance      Int      @default(0)
+  engagementScore Int      @default(0)
+  sponsorStatus   String   @default("Pending")
+  createdAt       DateTime @default(now())
+
+  schoolId        Int?
+  school          School?  @relation(fields: [schoolId], references: [id])
+}
+
+model Task {
+  id        Int      @id @default(autoincrement())
+  title     String
+  owner     String
+  priority  String   @default("Medium")
+  status    String   @default("To Do")
+  dueDate   DateTime
+  createdAt DateTime @default(now())
+
+  schoolId  Int?
+  school    School?  @relation(fields: [schoolId], references: [id])
+}
