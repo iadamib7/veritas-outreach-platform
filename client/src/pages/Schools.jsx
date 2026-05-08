@@ -1,18 +1,36 @@
-import { useState } from "react";
-import { schools as initialSchools } from "../data/mockData";
+import { useEffect, useState } from "react";
 
 function Schools() {
-  const [schools, setSchools] = useState(initialSchools);
+  const [schools, setSchools] = useState([]);
   const [showForm, setShowForm] = useState(false);
+  const [isLoading, setIsLoading] = useState(true);
 
   const [formData, setFormData] = useState({
     name: "",
     region: "Ashanti Region",
     contact: "",
     status: "Prospective",
-    students: "",
+    studentsCount: "",
     lastContacted: "",
   });
+
+  async function loadSchools() {
+    try {
+      const response = await fetch("http://localhost:5000/api/schools");
+
+      const data = await response.json();
+
+      setSchools(data);
+    } catch (error) {
+      console.error("Failed to load schools:", error);
+    } finally {
+      setIsLoading(false);
+    }
+  }
+
+  useEffect(() => {
+    loadSchools();
+  }, []);
 
   function handleChange(event) {
     const { name, value } = event.target;
@@ -23,31 +41,35 @@ function Schools() {
     }));
   }
 
-  function handleSubmit(event) {
+  async function handleSubmit(event) {
     event.preventDefault();
 
-    const newSchool = {
-      id: Date.now(),
-      name: formData.name,
-      region: formData.region,
-      contact: formData.contact,
-      status: formData.status,
-      students: Number(formData.students),
-      lastContacted: formData.lastContacted,
-    };
+    try {
+      const response = await fetch("http://localhost:5000/api/schools", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify(formData),
+      });
 
-    setSchools((currentSchools) => [newSchool, ...currentSchools]);
+      const newSchool = await response.json();
 
-    setFormData({
-      name: "",
-      region: "Ashanti Region",
-      contact: "",
-      status: "Prospective",
-      students: "",
-      lastContacted: "",
-    });
+      setSchools((currentSchools) => [newSchool, ...currentSchools]);
 
-    setShowForm(false);
+      setFormData({
+        name: "",
+        region: "Ashanti Region",
+        contact: "",
+        status: "Prospective",
+        studentsCount: "",
+        lastContacted: "",
+      });
+
+      setShowForm(false);
+    } catch (error) {
+      console.error("Failed to create school:", error);
+    }
   }
 
   return (
@@ -135,8 +157,8 @@ function Schools() {
             <label className="text-sm font-medium text-slate-700">
               Number of Students
               <input
-                name="students"
-                value={formData.students}
+                name="studentsCount"
+                value={formData.studentsCount}
                 onChange={handleChange}
                 required
                 type="number"
@@ -166,35 +188,41 @@ function Schools() {
       )}
 
       <div className="mt-8 overflow-x-auto rounded-2xl bg-white shadow-sm">
-        <table className="w-full min-w-[800px] text-left text-sm">
-          <thead className="bg-slate-50 text-slate-600">
-            <tr>
-              <th className="px-5 py-4">School</th>
-              <th className="px-5 py-4">Region</th>
-              <th className="px-5 py-4">Contact</th>
-              <th className="px-5 py-4">Status</th>
-              <th className="px-5 py-4">Students</th>
-              <th className="px-5 py-4">Last Contacted</th>
-            </tr>
-          </thead>
-
-          <tbody className="divide-y divide-slate-100">
-            {schools.map((school) => (
-              <tr key={school.id}>
-                <td className="px-5 py-4 font-medium">{school.name}</td>
-                <td className="px-5 py-4">{school.region}</td>
-                <td className="px-5 py-4">{school.contact}</td>
-                <td className="px-5 py-4">
-                  <span className="rounded-full bg-emerald-50 px-3 py-1 text-xs font-semibold text-emerald-700">
-                    {school.status}
-                  </span>
-                </td>
-                <td className="px-5 py-4">{school.students}</td>
-                <td className="px-5 py-4">{school.lastContacted}</td>
+        {isLoading ? (
+          <p className="p-6 text-sm text-slate-500">Loading schools...</p>
+        ) : (
+          <table className="w-full min-w-[800px] text-left text-sm">
+            <thead className="bg-slate-50 text-slate-600">
+              <tr>
+                <th className="px-5 py-4">School</th>
+                <th className="px-5 py-4">Region</th>
+                <th className="px-5 py-4">Contact</th>
+                <th className="px-5 py-4">Status</th>
+                <th className="px-5 py-4">Students</th>
+                <th className="px-5 py-4">Last Contacted</th>
               </tr>
-            ))}
-          </tbody>
-        </table>
+            </thead>
+
+            <tbody className="divide-y divide-slate-100">
+              {schools.map((school) => (
+                <tr key={school.id}>
+                  <td className="px-5 py-4 font-medium">{school.name}</td>
+                  <td className="px-5 py-4">{school.region}</td>
+                  <td className="px-5 py-4">{school.contact}</td>
+                  <td className="px-5 py-4">
+                    <span className="rounded-full bg-emerald-50 px-3 py-1 text-xs font-semibold text-emerald-700">
+                      {school.status}
+                    </span>
+                  </td>
+                  <td className="px-5 py-4">{school.studentsCount}</td>
+                  <td className="px-5 py-4">
+                    {new Date(school.lastContacted).toLocaleDateString()}
+                  </td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        )}
       </div>
     </section>
   );

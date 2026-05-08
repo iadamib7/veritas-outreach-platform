@@ -1,9 +1,9 @@
-import { useState } from "react";
-import { tasks as initialTasks } from "../data/mockData";
+import { useEffect, useState } from "react";
 
 function Tasks() {
-  const [tasks, setTasks] = useState(initialTasks);
+  const [tasks, setTasks] = useState([]);
   const [showForm, setShowForm] = useState(false);
+  const [isLoading, setIsLoading] = useState(true);
 
   const [formData, setFormData] = useState({
     title: "",
@@ -12,6 +12,24 @@ function Tasks() {
     status: "To Do",
     dueDate: "",
   });
+
+  async function loadTasks() {
+    try {
+      const response = await fetch("http://localhost:5000/api/tasks");
+
+      const data = await response.json();
+
+      setTasks(data);
+    } catch (error) {
+      console.error("Failed to load tasks:", error);
+    } finally {
+      setIsLoading(false);
+    }
+  }
+
+  useEffect(() => {
+    loadTasks();
+  }, []);
 
   function handleChange(event) {
     const { name, value } = event.target;
@@ -22,29 +40,55 @@ function Tasks() {
     }));
   }
 
-  function handleSubmit(event) {
+  async function handleSubmit(event) {
     event.preventDefault();
 
-    const newTask = {
-      id: Date.now(),
-      title: formData.title,
-      owner: formData.owner,
-      priority: formData.priority,
-      status: formData.status,
-      dueDate: formData.dueDate,
-    };
+    try {
+      const response = await fetch("http://localhost:5000/api/tasks", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify(formData),
+      });
 
-    setTasks((currentTasks) => [newTask, ...currentTasks]);
+      const newTask = await response.json();
 
-    setFormData({
-      title: "",
-      owner: "",
-      priority: "Medium",
-      status: "To Do",
-      dueDate: "",
-    });
+      setTasks((currentTasks) => [newTask, ...currentTasks]);
 
-    setShowForm(false);
+      setFormData({
+        title: "",
+        owner: "",
+        priority: "Medium",
+        status: "To Do",
+        dueDate: "",
+      });
+
+      setShowForm(false);
+    } catch (error) {
+      console.error("Failed to create task:", error);
+    }
+  }
+
+  async function completeTask(taskId) {
+    try {
+      const response = await fetch(
+        `http://localhost:5000/api/tasks/${taskId}/complete`,
+        {
+          method: "PATCH",
+        }
+      );
+
+      const updatedTask = await response.json();
+
+      setTasks((currentTasks) =>
+        currentTasks.map((task) =>
+          task.id === updatedTask.id ? updatedTask : task
+        )
+      );
+    } catch (error) {
+      console.error("Failed to complete task:", error);
+    }
   }
 
   return (
@@ -150,31 +194,50 @@ function Tasks() {
         </form>
       )}
 
-      <div className="mt-8 grid gap-4">
-        {tasks.map((task) => (
-          <article key={task.id} className="rounded-2xl bg-white p-5 shadow-sm">
-            <div className="flex flex-col justify-between gap-4 md:flex-row md:items-center">
-              <div>
-                <h3 className="text-lg font-bold">{task.title}</h3>
+      {isLoading ? (
+        <div className="mt-8 rounded-2xl bg-white p-6 shadow-sm">
+          <p className="text-sm text-slate-500">Loading tasks...</p>
+        </div>
+      ) : (
+        <div className="mt-8 grid gap-4">
+          {tasks.map((task) => (
+            <article
+              key={task.id}
+              className="rounded-2xl bg-white p-5 shadow-sm"
+            >
+              <div className="flex flex-col justify-between gap-4 md:flex-row md:items-center">
+                <div>
+                  <h3 className="text-lg font-bold">{task.title}</h3>
 
-                <p className="mt-1 text-sm text-slate-500">
-                  Owner: {task.owner} · Due: {task.dueDate}
-                </p>
+                  <p className="mt-1 text-sm text-slate-500">
+                    Owner: {task.owner} · Due:{" "}
+                    {new Date(task.dueDate).toLocaleDateString()}
+                  </p>
+                </div>
+
+                <div className="flex flex-wrap gap-2">
+                  <span className="rounded-full bg-orange-50 px-3 py-1 text-xs font-semibold text-orange-700">
+                    {task.priority}
+                  </span>
+
+                  <span className="rounded-full bg-slate-100 px-3 py-1 text-xs font-semibold text-slate-700">
+                    {task.status}
+                  </span>
+
+                  {task.status !== "Completed" && (
+                    <button
+                      onClick={() => completeTask(task.id)}
+                      className="rounded-full bg-emerald-600 px-3 py-1 text-xs font-semibold text-white"
+                    >
+                      Mark Complete
+                    </button>
+                  )}
+                </div>
               </div>
-
-              <div className="flex gap-2">
-                <span className="rounded-full bg-orange-50 px-3 py-1 text-xs font-semibold text-orange-700">
-                  {task.priority}
-                </span>
-
-                <span className="rounded-full bg-slate-100 px-3 py-1 text-xs font-semibold text-slate-700">
-                  {task.status}
-                </span>
-              </div>
-            </div>
-          </article>
-        ))}
-      </div>
+            </article>
+          ))}
+        </div>
+      )}
     </section>
   );
 }

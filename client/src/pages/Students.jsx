@@ -1,18 +1,36 @@
-import { useState } from "react";
-import { students as initialStudents } from "../data/mockData";
+import { useEffect, useState } from "react";
 
 function Students() {
-  const [students, setStudents] = useState(initialStudents);
+  const [students, setStudents] = useState([]);
   const [showForm, setShowForm] = useState(false);
+  const [isLoading, setIsLoading] = useState(true);
 
   const [formData, setFormData] = useState({
     name: "",
-    school: "",
+    schoolName: "",
     program: "",
     attendance: "",
     engagementScore: "",
     sponsorStatus: "Pending",
   });
+
+  async function loadStudents() {
+    try {
+      const response = await fetch("http://localhost:5000/api/students");
+
+      const data = await response.json();
+
+      setStudents(data);
+    } catch (error) {
+      console.error("Failed to load students:", error);
+    } finally {
+      setIsLoading(false);
+    }
+  }
+
+  useEffect(() => {
+    loadStudents();
+  }, []);
 
   function handleChange(event) {
     const { name, value } = event.target;
@@ -23,31 +41,35 @@ function Students() {
     }));
   }
 
-  function handleSubmit(event) {
+  async function handleSubmit(event) {
     event.preventDefault();
 
-    const newStudent = {
-      id: Date.now(),
-      name: formData.name,
-      school: formData.school,
-      program: formData.program,
-      attendance: Number(formData.attendance),
-      engagementScore: Number(formData.engagementScore),
-      sponsorStatus: formData.sponsorStatus,
-    };
+    try {
+      const response = await fetch("http://localhost:5000/api/students", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify(formData),
+      });
 
-    setStudents((currentStudents) => [newStudent, ...currentStudents]);
+      const newStudent = await response.json();
 
-    setFormData({
-      name: "",
-      school: "",
-      program: "",
-      attendance: "",
-      engagementScore: "",
-      sponsorStatus: "Pending",
-    });
+      setStudents((currentStudents) => [newStudent, ...currentStudents]);
 
-    setShowForm(false);
+      setFormData({
+        name: "",
+        schoolName: "",
+        program: "",
+        attendance: "",
+        engagementScore: "",
+        sponsorStatus: "Pending",
+      });
+
+      setShowForm(false);
+    } catch (error) {
+      console.error("Failed to create student:", error);
+    }
   }
 
   return (
@@ -96,8 +118,8 @@ function Students() {
             <label className="text-sm font-medium text-slate-700">
               School
               <input
-                name="school"
-                value={formData.school}
+                name="schoolName"
+                value={formData.schoolName}
                 onChange={handleChange}
                 required
                 className="mt-2 w-full rounded-xl border border-slate-200 px-4 py-2 outline-none focus:border-emerald-500"
@@ -167,43 +189,51 @@ function Students() {
         </form>
       )}
 
-      <div className="mt-8 grid gap-4 lg:grid-cols-3">
-        {students.map((student) => (
-          <article
-            key={student.id}
-            className="rounded-2xl bg-white p-5 shadow-sm"
-          >
-            <div className="flex items-start justify-between gap-4">
-              <div>
-                <h3 className="text-lg font-bold">{student.name}</h3>
-                <p className="mt-1 text-sm text-slate-500">
-                  {student.school}
-                </p>
+      {isLoading ? (
+        <div className="mt-8 rounded-2xl bg-white p-6 shadow-sm">
+          <p className="text-sm text-slate-500">Loading students...</p>
+        </div>
+      ) : (
+        <div className="mt-8 grid gap-4 lg:grid-cols-3">
+          {students.map((student) => (
+            <article
+              key={student.id}
+              className="rounded-2xl bg-white p-5 shadow-sm"
+            >
+              <div className="flex items-start justify-between gap-4">
+                <div>
+                  <h3 className="text-lg font-bold">{student.name}</h3>
+                  <p className="mt-1 text-sm text-slate-500">
+                    {student.schoolName}
+                  </p>
+                </div>
+
+                <span className="rounded-full bg-blue-50 px-3 py-1 text-xs font-semibold text-blue-700">
+                  {student.sponsorStatus}
+                </span>
               </div>
 
-              <span className="rounded-full bg-blue-50 px-3 py-1 text-xs font-semibold text-blue-700">
-                {student.sponsorStatus}
-              </span>
-            </div>
+              <p className="mt-4 text-sm text-slate-600">{student.program}</p>
 
-            <p className="mt-4 text-sm text-slate-600">{student.program}</p>
+              <div className="mt-5 grid grid-cols-2 gap-3">
+                <div className="rounded-xl bg-slate-50 p-3">
+                  <p className="text-xs text-slate-500">Attendance</p>
+                  <p className="mt-1 text-xl font-bold">
+                    {student.attendance}
+                  </p>
+                </div>
 
-            <div className="mt-5 grid grid-cols-2 gap-3">
-              <div className="rounded-xl bg-slate-50 p-3">
-                <p className="text-xs text-slate-500">Attendance</p>
-                <p className="mt-1 text-xl font-bold">{student.attendance}</p>
+                <div className="rounded-xl bg-slate-50 p-3">
+                  <p className="text-xs text-slate-500">Engagement</p>
+                  <p className="mt-1 text-xl font-bold">
+                    {student.engagementScore}%
+                  </p>
+                </div>
               </div>
-
-              <div className="rounded-xl bg-slate-50 p-3">
-                <p className="text-xs text-slate-500">Engagement</p>
-                <p className="mt-1 text-xl font-bold">
-                  {student.engagementScore}%
-                </p>
-              </div>
-            </div>
-          </article>
-        ))}
-      </div>
+            </article>
+          ))}
+        </div>
+      )}
     </section>
   );
 }
