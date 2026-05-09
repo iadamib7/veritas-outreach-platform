@@ -124,6 +124,26 @@ app.post("/api/schools", async (req, res) => {
   }
 });
 
+app.delete("/api/schools/:id", async (req, res) => {
+  try {
+    const school = await prisma.school.delete({
+      where: {
+        id: Number(req.params.id),
+      },
+    });
+
+    await broadcastDashboardStats();
+
+    res.json(school);
+  } catch (error) {
+    console.error(error);
+
+    res.status(500).json({
+      message: "Failed to delete school",
+    });
+  }
+});
+
 app.get("/api/students", async (req, res) => {
   try {
     const students = await prisma.student.findMany({
@@ -172,6 +192,26 @@ app.post("/api/students", async (req, res) => {
 
     res.status(500).json({
       message: "Failed to create student",
+    });
+  }
+});
+
+app.delete("/api/students/:id", async (req, res) => {
+  try {
+    const student = await prisma.student.delete({
+      where: {
+        id: Number(req.params.id),
+      },
+    });
+
+    await broadcastDashboardStats();
+
+    res.json(student);
+  } catch (error) {
+    console.error(error);
+
+    res.status(500).json({
+      message: "Failed to delete student",
     });
   }
 });
@@ -239,6 +279,26 @@ app.patch("/api/tasks/:id/complete", async (req, res) => {
 
     res.status(500).json({
       message: "Failed to complete task",
+    });
+  }
+});
+
+app.delete("/api/tasks/:id", async (req, res) => {
+  try {
+    const task = await prisma.task.delete({
+      where: {
+        id: Number(req.params.id),
+      },
+    });
+
+    await broadcastDashboardStats();
+
+    res.json(task);
+  } catch (error) {
+    console.error(error);
+
+    res.status(500).json({
+      message: "Failed to delete task",
     });
   }
 });

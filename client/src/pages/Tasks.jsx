@@ -16,7 +16,6 @@ function Tasks() {
   async function loadTasks() {
     try {
       const response = await fetch("http://localhost:5000/api/tasks");
-
       const data = await response.json();
 
       setTasks(data);
@@ -88,6 +87,28 @@ function Tasks() {
       );
     } catch (error) {
       console.error("Failed to complete task:", error);
+    }
+  }
+
+  async function deleteTask(taskId) {
+    const shouldDelete = window.confirm(
+      "Are you sure you want to delete this task?"
+    );
+
+    if (!shouldDelete) {
+      return;
+    }
+
+    try {
+      await fetch(`http://localhost:5000/api/tasks/${taskId}`, {
+        method: "DELETE",
+      });
+
+      setTasks((currentTasks) =>
+        currentTasks.filter((task) => task.id !== taskId)
+      );
+    } catch (error) {
+      console.error("Failed to delete task:", error);
     }
   }
 
@@ -232,6 +253,13 @@ function Tasks() {
                       Mark Complete
                     </button>
                   )}
+
+                  <button
+                    onClick={() => deleteTask(task.id)}
+                    className="rounded-full bg-red-600 px-3 py-1 text-xs font-semibold text-white"
+                  >
+                    Delete
+                  </button>
                 </div>
               </div>
             </article>
