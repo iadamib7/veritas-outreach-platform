@@ -4,6 +4,7 @@ function Tasks() {
   const [tasks, setTasks] = useState([]);
   const [showForm, setShowForm] = useState(false);
   const [isLoading, setIsLoading] = useState(true);
+  const [editingTaskId, setEditingTaskId] = useState(null);
 
   const [formData, setFormData] = useState({
     title: "",
@@ -39,10 +40,61 @@ function Tasks() {
     }));
   }
 
+  function resetForm() {
+    setFormData({
+      title: "",
+      owner: "",
+      priority: "Medium",
+      status: "To Do",
+      dueDate: "",
+    });
+
+    setEditingTaskId(null);
+    setShowForm(false);
+  }
+
+  function startEditing(task) {
+    setEditingTaskId(task.id);
+
+    setFormData({
+      title: task.title,
+      owner: task.owner,
+      priority: task.priority,
+      status: task.status,
+      dueDate: task.dueDate.slice(0, 10),
+    });
+
+    setShowForm(true);
+  }
+
   async function handleSubmit(event) {
     event.preventDefault();
 
     try {
+      if (editingTaskId) {
+        const response = await fetch(
+          `http://localhost:5000/api/tasks/${editingTaskId}`,
+          {
+            method: "PATCH",
+            headers: {
+              "Content-Type": "application/json",
+            },
+            body: JSON.stringify(formData),
+          }
+        );
+
+        const updatedTask = await response.json();
+
+        setTasks((currentTasks) =>
+          currentTasks.map((task) =>
+            task.id === updatedTask.id ? updatedTask : task
+          )
+        );
+
+        resetForm();
+        return;
+      }
+
       const response = await fetch("http://localhost:5000/api/tasks", {
         method: "POST",
         headers: {
@@ -55,17 +107,9 @@ function Tasks() {
 
       setTasks((currentTasks) => [newTask, ...currentTasks]);
 
-      setFormData({
-        title: "",
-        owner: "",
-        priority: "Medium",
-        status: "To Do",
-        dueDate: "",
-      });
-
-      setShowForm(false);
+      resetForm();
     } catch (error) {
-      console.error("Failed to create task:", error);
+      console.error("Failed to save task:", error);
     }
   }
 
@@ -128,7 +172,13 @@ function Tasks() {
         </div>
 
         <button
-          onClick={() => setShowForm((currentValue) => !currentValue)}
+          onClick={() => {
+            if (showForm) {
+              resetForm();
+            } else {
+              setShowForm(true);
+            }
+          }}
           className="rounded-xl bg-emerald-600 px-4 py-2 text-sm font-semibold text-white"
         >
           {showForm ? "Close Form" : "Add Task"}
@@ -140,7 +190,9 @@ function Tasks() {
           onSubmit={handleSubmit}
           className="mt-8 rounded-2xl bg-white p-6 shadow-sm"
         >
-          <h3 className="text-xl font-semibold">Add New Task</h3>
+          <h3 className="text-xl font-semibold">
+            {editingTaskId ? "Edit Task" : "Add New Task"}
+          </h3>
 
           <div className="mt-5 grid gap-4 md:grid-cols-2">
             <label className="text-sm font-medium text-slate-700">
@@ -209,9 +261,21 @@ function Tasks() {
             </label>
           </div>
 
-          <button className="mt-5 rounded-xl bg-slate-900 px-4 py-2 text-sm font-semibold text-white">
-            Save Task
-          </button>
+          <div className="mt-5 flex gap-3">
+            <button className="rounded-xl bg-slate-900 px-4 py-2 text-sm font-semibold text-white">
+              {editingTaskId ? "Save Changes" : "Save Task"}
+            </button>
+
+            {editingTaskId && (
+              <button
+                type="button"
+                onClick={resetForm}
+                className="rounded-xl bg-slate-200 px-4 py-2 text-sm font-semibold text-slate-700"
+              >
+                Cancel Edit
+              </button>
+            )}
+          </div>
         </form>
       )}
 
@@ -244,6 +308,13 @@ function Tasks() {
                   <span className="rounded-full bg-slate-100 px-3 py-1 text-xs font-semibold text-slate-700">
                     {task.status}
                   </span>
+
+                  <button
+                    onClick={() => startEditing(task)}
+                    className="rounded-full bg-blue-600 px-3 py-1 text-xs font-semibold text-white"
+                  >
+                    Edit
+                  </button>
 
                   {task.status !== "Completed" && (
                     <button

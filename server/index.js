@@ -260,6 +260,35 @@ app.post("/api/tasks", async (req, res) => {
   }
 });
 
+app.patch("/api/tasks/:id", async (req, res) => {
+  try {
+    const { title, owner, priority, status, dueDate } = req.body;
+
+    const task = await prisma.task.update({
+      where: {
+        id: Number(req.params.id),
+      },
+      data: {
+        title,
+        owner,
+        priority,
+        status,
+        dueDate: new Date(dueDate),
+      },
+    });
+
+    await broadcastDashboardStats();
+
+    res.json(task);
+  } catch (error) {
+    console.error(error);
+
+    res.status(500).json({
+      message: "Failed to update task",
+    });
+  }
+});
+
 app.patch("/api/tasks/:id/complete", async (req, res) => {
   try {
     const task = await prisma.task.update({
