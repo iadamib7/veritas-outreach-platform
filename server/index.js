@@ -196,6 +196,43 @@ app.post("/api/students", async (req, res) => {
   }
 });
 
+app.patch("/api/students/:id", async (req, res) => {
+  try {
+    const {
+      name,
+      schoolName,
+      program,
+      attendance,
+      engagementScore,
+      sponsorStatus,
+    } = req.body;
+
+    const student = await prisma.student.update({
+      where: {
+        id: Number(req.params.id),
+      },
+      data: {
+        name,
+        schoolName,
+        program,
+        attendance: Number(attendance),
+        engagementScore: Number(engagementScore),
+        sponsorStatus,
+      },
+    });
+
+    await broadcastDashboardStats();
+
+    res.json(student);
+  } catch (error) {
+    console.error(error);
+
+    res.status(500).json({
+      message: "Failed to update student",
+    });
+  }
+});
+
 app.delete("/api/students/:id", async (req, res) => {
   try {
     const student = await prisma.student.delete({

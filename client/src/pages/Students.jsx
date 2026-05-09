@@ -4,6 +4,7 @@ function Students() {
   const [students, setStudents] = useState([]);
   const [showForm, setShowForm] = useState(false);
   const [isLoading, setIsLoading] = useState(true);
+  const [editingStudentId, setEditingStudentId] = useState(null);
 
   const [formData, setFormData] = useState({
     name: "",
@@ -41,10 +42,63 @@ function Students() {
     }));
   }
 
+  function resetForm() {
+    setFormData({
+      name: "",
+      schoolName: "",
+      program: "",
+      attendance: "",
+      engagementScore: "",
+      sponsorStatus: "Pending",
+    });
+
+    setEditingStudentId(null);
+    setShowForm(false);
+  }
+
+  function startEditing(student) {
+    setEditingStudentId(student.id);
+
+    setFormData({
+      name: student.name,
+      schoolName: student.schoolName,
+      program: student.program,
+      attendance: student.attendance,
+      engagementScore: student.engagementScore,
+      sponsorStatus: student.sponsorStatus,
+    });
+
+    setShowForm(true);
+  }
+
   async function handleSubmit(event) {
     event.preventDefault();
 
     try {
+      if (editingStudentId) {
+        const response = await fetch(
+          `http://localhost:5000/api/students/${editingStudentId}`,
+          {
+            method: "PATCH",
+            headers: {
+              "Content-Type": "application/json",
+            },
+            body: JSON.stringify(formData),
+          }
+        );
+
+        const updatedStudent = await response.json();
+
+        setStudents((currentStudents) =>
+          currentStudents.map((student) =>
+            student.id === updatedStudent.id ? updatedStudent : student
+          )
+        );
+
+        resetForm();
+        return;
+      }
+
       const response = await fetch("http://localhost:5000/api/students", {
         method: "POST",
         headers: {
@@ -57,18 +111,9 @@ function Students() {
 
       setStudents((currentStudents) => [newStudent, ...currentStudents]);
 
-      setFormData({
-        name: "",
-        schoolName: "",
-        program: "",
-        attendance: "",
-        engagementScore: "",
-        sponsorStatus: "Pending",
-      });
-
-      setShowForm(false);
+      resetForm();
     } catch (error) {
-      console.error("Failed to create student:", error);
+      console.error("Failed to save student:", error);
     }
   }
 
@@ -110,7 +155,13 @@ function Students() {
         </div>
 
         <button
-          onClick={() => setShowForm((currentValue) => !currentValue)}
+          onClick={() => {
+            if (showForm) {
+              resetForm();
+            } else {
+              setShowForm(true);
+            }
+          }}
           className="rounded-xl bg-emerald-600 px-4 py-2 text-sm font-semibold text-white"
         >
           {showForm ? "Close Form" : "Add Student"}
@@ -122,7 +173,9 @@ function Students() {
           onSubmit={handleSubmit}
           className="mt-8 rounded-2xl bg-white p-6 shadow-sm"
         >
-          <h3 className="text-xl font-semibold">Add New Student</h3>
+          <h3 className="text-xl font-semibold">
+            {editingStudentId ? "Edit Student" : "Add New Student"}
+          </h3>
 
           <div className="mt-5 grid gap-4 md:grid-cols-2">
             <label className="text-sm font-medium text-slate-700">
@@ -205,9 +258,21 @@ function Students() {
             </label>
           </div>
 
-          <button className="mt-5 rounded-xl bg-slate-900 px-4 py-2 text-sm font-semibold text-white">
-            Save Student
-          </button>
+          <div className="mt-5 flex gap-3">
+            <button className="rounded-xl bg-slate-900 px-4 py-2 text-sm font-semibold text-white">
+              {editingStudentId ? "Save Changes" : "Save Student"}
+            </button>
+
+            {editingStudentId && (
+              <button
+                type="button"
+                onClick={resetForm}
+                className="rounded-xl bg-slate-200 px-4 py-2 text-sm font-semibold text-slate-700"
+              >
+                Cancel Edit
+              </button>
+            )}
+          </div>
         </form>
       )}
 
@@ -256,12 +321,21 @@ function Students() {
                 </div>
               </div>
 
-              <button
-                onClick={() => deleteStudent(student.id)}
-                className="mt-5 rounded-xl bg-red-600 px-4 py-2 text-sm font-semibold text-white"
-              >
-                Delete Student
-              </button>
+              <div className="mt-5 flex gap-2">
+                <button
+                  onClick={() => startEditing(student)}
+                  className="rounded-xl bg-blue-600 px-4 py-2 text-sm font-semibold text-white"
+                >
+                  Edit
+                </button>
+
+                <button
+                  onClick={() => deleteStudent(student.id)}
+                  className="rounded-xl bg-red-600 px-4 py-2 text-sm font-semibold text-white"
+                >
+                  Delete
+                </button>
+              </div>
             </article>
           ))}
         </div>
