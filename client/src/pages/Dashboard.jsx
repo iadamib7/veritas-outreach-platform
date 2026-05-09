@@ -78,22 +78,6 @@ function Dashboard() {
               A centralized command center for managing school partnerships,
               tracking student engagement, and coordinating outreach tasks.
             </p>
-
-            <div className="mt-6 flex flex-wrap gap-3">
-              <button
-                onClick={() => socket.emit("engagement:add")}
-                className="rounded-xl bg-[#D6A51E] px-4 py-2 text-sm font-semibold text-[#0B2545] shadow-sm hover:bg-[#E7B92C]"
-              >
-                Add Student Engagement
-              </button>
-
-              <button
-                onClick={() => socket.emit("task:complete")}
-                className="rounded-xl bg-white/10 px-4 py-2 text-sm font-semibold text-white ring-1 ring-white/20 hover:bg-white/20"
-              >
-                Complete Task
-              </button>
-            </div>
           </div>
         </div>
       </div>

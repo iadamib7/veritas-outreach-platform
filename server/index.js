@@ -407,6 +407,58 @@ io.on("connection", async (socket) => {
 
   socket.emit("dashboard:update", dashboardStats);
 
+  socket.on("engagement:add", async () => {
+    try {
+      await prisma.student.create({
+        data: {
+          name: "New Engagement Record",
+          schoolName: "General Outreach",
+          program: "Student Engagement",
+          attendance: 1,
+          engagementScore: 75,
+          sponsorStatus: "Pending",
+        },
+      });
+
+      await broadcastDashboardStats();
+    } catch (error) {
+      console.error("Failed to add engagement:", error);
+    }
+  });
+
+  socket.on("task:complete", async () => {
+    try {
+      const taskToComplete = await prisma.task.findFirst({
+        where: {
+          NOT: {
+            status: "Completed",
+          },
+        },
+        orderBy: {
+          createdAt: "asc",
+        },
+      });
+
+      if (!taskToComplete) {
+        await broadcastDashboardStats();
+        return;
+      }
+
+      await prisma.task.update({
+        where: {
+          id: taskToComplete.id,
+        },
+        data: {
+          status: "Completed",
+        },
+      });
+
+      await broadcastDashboardStats();
+    } catch (error) {
+      console.error("Failed to complete task:", error);
+    }
+  });
+
   socket.on("disconnect", () => {
     console.log("A user disconnected:", socket.id);
   });
