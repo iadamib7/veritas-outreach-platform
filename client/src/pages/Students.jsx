@@ -72,6 +72,28 @@ function Students() {
     }
   }
 
+  async function deleteStudent(studentId) {
+    const shouldDelete = window.confirm(
+      "Are you sure you want to delete this student?"
+    );
+
+    if (!shouldDelete) {
+      return;
+    }
+
+    try {
+      await fetch(`http://localhost:5000/api/students/${studentId}`, {
+        method: "DELETE",
+      });
+
+      setStudents((currentStudents) =>
+        currentStudents.filter((student) => student.id !== studentId)
+      );
+    } catch (error) {
+      console.error("Failed to delete student:", error);
+    }
+  }
+
   return (
     <section className="px-6 py-8">
       <div className="flex flex-col justify-between gap-4 md:flex-row md:items-center">
@@ -203,6 +225,7 @@ function Students() {
               <div className="flex items-start justify-between gap-4">
                 <div>
                   <h3 className="text-lg font-bold">{student.name}</h3>
+
                   <p className="mt-1 text-sm text-slate-500">
                     {student.schoolName}
                   </p>
@@ -218,6 +241,7 @@ function Students() {
               <div className="mt-5 grid grid-cols-2 gap-3">
                 <div className="rounded-xl bg-slate-50 p-3">
                   <p className="text-xs text-slate-500">Attendance</p>
+
                   <p className="mt-1 text-xl font-bold">
                     {student.attendance}
                   </p>
@@ -225,11 +249,19 @@ function Students() {
 
                 <div className="rounded-xl bg-slate-50 p-3">
                   <p className="text-xs text-slate-500">Engagement</p>
+
                   <p className="mt-1 text-xl font-bold">
                     {student.engagementScore}%
                   </p>
                 </div>
               </div>
+
+              <button
+                onClick={() => deleteStudent(student.id)}
+                className="mt-5 rounded-xl bg-red-600 px-4 py-2 text-sm font-semibold text-white"
+              >
+                Delete Student
+              </button>
             </article>
           ))}
         </div>
