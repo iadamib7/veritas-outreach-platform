@@ -4,6 +4,7 @@ function Schools() {
   const [schools, setSchools] = useState([]);
   const [showForm, setShowForm] = useState(false);
   const [isLoading, setIsLoading] = useState(true);
+  const [editingSchoolId, setEditingSchoolId] = useState(null);
 
   const [formData, setFormData] = useState({
     name: "",
@@ -40,10 +41,63 @@ function Schools() {
     }));
   }
 
+  function resetForm() {
+    setFormData({
+      name: "",
+      region: "Ashanti Region",
+      contact: "",
+      status: "Prospective",
+      studentsCount: "",
+      lastContacted: "",
+    });
+
+    setEditingSchoolId(null);
+    setShowForm(false);
+  }
+
+  function startEditing(school) {
+    setEditingSchoolId(school.id);
+
+    setFormData({
+      name: school.name,
+      region: school.region,
+      contact: school.contact,
+      status: school.status,
+      studentsCount: school.studentsCount,
+      lastContacted: school.lastContacted.slice(0, 10),
+    });
+
+    setShowForm(true);
+  }
+
   async function handleSubmit(event) {
     event.preventDefault();
 
     try {
+      if (editingSchoolId) {
+        const response = await fetch(
+          `http://localhost:5000/api/schools/${editingSchoolId}`,
+          {
+            method: "PATCH",
+            headers: {
+              "Content-Type": "application/json",
+            },
+            body: JSON.stringify(formData),
+          }
+        );
+
+        const updatedSchool = await response.json();
+
+        setSchools((currentSchools) =>
+          currentSchools.map((school) =>
+            school.id === updatedSchool.id ? updatedSchool : school
+          )
+        );
+
+        resetForm();
+        return;
+      }
+
       const response = await fetch("http://localhost:5000/api/schools", {
         method: "POST",
         headers: {
@@ -56,18 +110,9 @@ function Schools() {
 
       setSchools((currentSchools) => [newSchool, ...currentSchools]);
 
-      setFormData({
-        name: "",
-        region: "Ashanti Region",
-        contact: "",
-        status: "Prospective",
-        studentsCount: "",
-        lastContacted: "",
-      });
-
-      setShowForm(false);
+      resetForm();
     } catch (error) {
-      console.error("Failed to create school:", error);
+      console.error("Failed to save school:", error);
     }
   }
 
@@ -109,7 +154,13 @@ function Schools() {
         </div>
 
         <button
-          onClick={() => setShowForm((currentValue) => !currentValue)}
+          onClick={() => {
+            if (showForm) {
+              resetForm();
+            } else {
+              setShowForm(true);
+            }
+          }}
           className="rounded-xl bg-emerald-600 px-4 py-2 text-sm font-semibold text-white"
         >
           {showForm ? "Close Form" : "Add School"}
@@ -121,7 +172,9 @@ function Schools() {
           onSubmit={handleSubmit}
           className="mt-8 rounded-2xl bg-white p-6 shadow-sm"
         >
-          <h3 className="text-xl font-semibold">Add New School</h3>
+          <h3 className="text-xl font-semibold">
+            {editingSchoolId ? "Edit School" : "Add New School"}
+          </h3>
 
           <div className="mt-5 grid gap-4 md:grid-cols-2">
             <label className="text-sm font-medium text-slate-700">
@@ -202,9 +255,21 @@ function Schools() {
             </label>
           </div>
 
-          <button className="mt-5 rounded-xl bg-slate-900 px-4 py-2 text-sm font-semibold text-white">
-            Save School
-          </button>
+          <div className="mt-5 flex gap-3">
+            <button className="rounded-xl bg-slate-900 px-4 py-2 text-sm font-semibold text-white">
+              {editingSchoolId ? "Save Changes" : "Save School"}
+            </button>
+
+            {editingSchoolId && (
+              <button
+                type="button"
+                onClick={resetForm}
+                className="rounded-xl bg-slate-200 px-4 py-2 text-sm font-semibold text-slate-700"
+              >
+                Cancel Edit
+              </button>
+            )}
+          </div>
         </form>
       )}
 
@@ -212,7 +277,7 @@ function Schools() {
         {isLoading ? (
           <p className="p-6 text-sm text-slate-500">Loading schools...</p>
         ) : (
-          <table className="w-full min-w-[900px] text-left text-sm">
+          <table className="w-full min-w-[950px] text-left text-sm">
             <thead className="bg-slate-50 text-slate-600">
               <tr>
                 <th className="px-5 py-4">School</th>
@@ -241,12 +306,21 @@ function Schools() {
                     {new Date(school.lastContacted).toLocaleDateString()}
                   </td>
                   <td className="px-5 py-4">
-                    <button
-                      onClick={() => deleteSchool(school.id)}
-                      className="rounded-full bg-red-600 px-3 py-1 text-xs font-semibold text-white"
-                    >
-                      Delete
-                    </button>
+                    <div className="flex gap-2">
+                      <button
+                        onClick={() => startEditing(school)}
+                        className="rounded-full bg-blue-600 px-3 py-1 text-xs font-semibold text-white"
+                      >
+                        Edit
+                      </button>
+
+                      <button
+                        onClick={() => deleteSchool(school.id)}
+                        className="rounded-full bg-red-600 px-3 py-1 text-xs font-semibold text-white"
+                      >
+                        Delete
+                      </button>
+                    </div>
                   </td>
                 </tr>
               ))}

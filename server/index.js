@@ -124,6 +124,37 @@ app.post("/api/schools", async (req, res) => {
   }
 });
 
+app.patch("/api/schools/:id", async (req, res) => {
+  try {
+    const { name, region, contact, status, studentsCount, lastContacted } =
+      req.body;
+
+    const school = await prisma.school.update({
+      where: {
+        id: Number(req.params.id),
+      },
+      data: {
+        name,
+        region,
+        contact,
+        status,
+        studentsCount: Number(studentsCount),
+        lastContacted: new Date(lastContacted),
+      },
+    });
+
+    await broadcastDashboardStats();
+
+    res.json(school);
+  } catch (error) {
+    console.error(error);
+
+    res.status(500).json({
+      message: "Failed to update school",
+    });
+  }
+});
+
 app.delete("/api/schools/:id", async (req, res) => {
   try {
     const school = await prisma.school.delete({
