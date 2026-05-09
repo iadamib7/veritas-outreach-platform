@@ -17,7 +17,6 @@ function Schools() {
   async function loadSchools() {
     try {
       const response = await fetch("http://localhost:5000/api/schools");
-
       const data = await response.json();
 
       setSchools(data);
@@ -69,6 +68,28 @@ function Schools() {
       setShowForm(false);
     } catch (error) {
       console.error("Failed to create school:", error);
+    }
+  }
+
+  async function deleteSchool(schoolId) {
+    const shouldDelete = window.confirm(
+      "Are you sure you want to delete this school?"
+    );
+
+    if (!shouldDelete) {
+      return;
+    }
+
+    try {
+      await fetch(`http://localhost:5000/api/schools/${schoolId}`, {
+        method: "DELETE",
+      });
+
+      setSchools((currentSchools) =>
+        currentSchools.filter((school) => school.id !== schoolId)
+      );
+    } catch (error) {
+      console.error("Failed to delete school:", error);
     }
   }
 
@@ -191,7 +212,7 @@ function Schools() {
         {isLoading ? (
           <p className="p-6 text-sm text-slate-500">Loading schools...</p>
         ) : (
-          <table className="w-full min-w-[800px] text-left text-sm">
+          <table className="w-full min-w-[900px] text-left text-sm">
             <thead className="bg-slate-50 text-slate-600">
               <tr>
                 <th className="px-5 py-4">School</th>
@@ -200,6 +221,7 @@ function Schools() {
                 <th className="px-5 py-4">Status</th>
                 <th className="px-5 py-4">Students</th>
                 <th className="px-5 py-4">Last Contacted</th>
+                <th className="px-5 py-4">Actions</th>
               </tr>
             </thead>
 
@@ -217,6 +239,14 @@ function Schools() {
                   <td className="px-5 py-4">{school.studentsCount}</td>
                   <td className="px-5 py-4">
                     {new Date(school.lastContacted).toLocaleDateString()}
+                  </td>
+                  <td className="px-5 py-4">
+                    <button
+                      onClick={() => deleteSchool(school.id)}
+                      className="rounded-full bg-red-600 px-3 py-1 text-xs font-semibold text-white"
+                    >
+                      Delete
+                    </button>
                   </td>
                 </tr>
               ))}
