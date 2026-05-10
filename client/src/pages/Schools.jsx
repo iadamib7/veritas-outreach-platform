@@ -1,5 +1,7 @@
 import { useEffect, useState } from "react";
 
+const API_URL = "https://veritas-outreach-api.onrender.com";
+
 function Schools() {
   const [schools, setSchools] = useState([]);
   const [showForm, setShowForm] = useState(false);
@@ -17,7 +19,7 @@ function Schools() {
 
   async function loadSchools() {
     try {
-      const response = await fetch("http://localhost:5000/api/schools");
+      const response = await fetch(`${API_URL}/api/schools`);
       const data = await response.json();
 
       setSchools(data);
@@ -75,16 +77,13 @@ function Schools() {
 
     try {
       if (editingSchoolId) {
-        const response = await fetch(
-          `http://localhost:5000/api/schools/${editingSchoolId}`,
-          {
-            method: "PATCH",
-            headers: {
-              "Content-Type": "application/json",
-            },
-            body: JSON.stringify(formData),
-          }
-        );
+        const response = await fetch(`${API_URL}/api/schools/${editingSchoolId}`, {
+          method: "PATCH",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify(formData),
+        });
 
         const updatedSchool = await response.json();
 
@@ -98,7 +97,7 @@ function Schools() {
         return;
       }
 
-      const response = await fetch("http://localhost:5000/api/schools", {
+      const response = await fetch(`${API_URL}/api/schools`, {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
@@ -126,7 +125,7 @@ function Schools() {
     }
 
     try {
-      await fetch(`http://localhost:5000/api/schools/${schoolId}`, {
+      await fetch(`${API_URL}/api/schools/${schoolId}`, {
         method: "DELETE",
       });
 
@@ -142,11 +141,11 @@ function Schools() {
     <section className="px-6 py-8">
       <div className="flex flex-col justify-between gap-4 md:flex-row md:items-center">
         <div>
-          <p className="text-sm font-semibold uppercase tracking-wide text-emerald-700">
+          <p className="text-sm font-semibold uppercase tracking-wide text-[#D6A51E]">
             Partnership Management
           </p>
 
-          <h2 className="mt-2 text-3xl font-bold">Schools</h2>
+          <h2 className="mt-2 text-3xl font-bold text-[#0B2545]">Schools</h2>
 
           <p className="mt-2 text-slate-600">
             Track partner schools, contacts, partnership status, and follow-ups.
@@ -161,7 +160,7 @@ function Schools() {
               setShowForm(true);
             }
           }}
-          className="rounded-xl bg-emerald-600 px-4 py-2 text-sm font-semibold text-white"
+          className="rounded-xl bg-[#0B2545] px-4 py-2 text-sm font-semibold text-white hover:bg-[#12355B]"
         >
           {showForm ? "Close Form" : "Add School"}
         </button>
@@ -172,7 +171,7 @@ function Schools() {
           onSubmit={handleSubmit}
           className="mt-8 rounded-2xl bg-white p-6 shadow-sm"
         >
-          <h3 className="text-xl font-semibold">
+          <h3 className="text-xl font-semibold text-[#0B2545]">
             {editingSchoolId ? "Edit School" : "Add New School"}
           </h3>
 
@@ -184,7 +183,7 @@ function Schools() {
                 value={formData.name}
                 onChange={handleChange}
                 required
-                className="mt-2 w-full rounded-xl border border-slate-200 px-4 py-2 outline-none focus:border-emerald-500"
+                className="mt-2 w-full rounded-xl border border-slate-200 px-4 py-2 outline-none focus:border-[#D6A51E]"
                 placeholder="Example: Kumasi High School"
               />
             </label>
@@ -196,7 +195,7 @@ function Schools() {
                 value={formData.region}
                 onChange={handleChange}
                 required
-                className="mt-2 w-full rounded-xl border border-slate-200 px-4 py-2 outline-none focus:border-emerald-500"
+                className="mt-2 w-full rounded-xl border border-slate-200 px-4 py-2 outline-none focus:border-[#D6A51E]"
               />
             </label>
 
@@ -207,7 +206,7 @@ function Schools() {
                 value={formData.contact}
                 onChange={handleChange}
                 required
-                className="mt-2 w-full rounded-xl border border-slate-200 px-4 py-2 outline-none focus:border-emerald-500"
+                className="mt-2 w-full rounded-xl border border-slate-200 px-4 py-2 outline-none focus:border-[#D6A51E]"
                 placeholder="Example: Ama Mensah"
               />
             </label>
@@ -218,7 +217,7 @@ function Schools() {
                 name="status"
                 value={formData.status}
                 onChange={handleChange}
-                className="mt-2 w-full rounded-xl border border-slate-200 px-4 py-2 outline-none focus:border-emerald-500"
+                className="mt-2 w-full rounded-xl border border-slate-200 px-4 py-2 outline-none focus:border-[#D6A51E]"
               >
                 <option>Prospective</option>
                 <option>Contacted</option>
@@ -237,7 +236,7 @@ function Schools() {
                 required
                 type="number"
                 min="0"
-                className="mt-2 w-full rounded-xl border border-slate-200 px-4 py-2 outline-none focus:border-emerald-500"
+                className="mt-2 w-full rounded-xl border border-slate-200 px-4 py-2 outline-none focus:border-[#D6A51E]"
                 placeholder="Example: 180"
               />
             </label>
@@ -250,13 +249,13 @@ function Schools() {
                 onChange={handleChange}
                 required
                 type="date"
-                className="mt-2 w-full rounded-xl border border-slate-200 px-4 py-2 outline-none focus:border-emerald-500"
+                className="mt-2 w-full rounded-xl border border-slate-200 px-4 py-2 outline-none focus:border-[#D6A51E]"
               />
             </label>
           </div>
 
           <div className="mt-5 flex gap-3">
-            <button className="rounded-xl bg-slate-900 px-4 py-2 text-sm font-semibold text-white">
+            <button className="rounded-xl bg-[#0B2545] px-4 py-2 text-sm font-semibold text-white">
               {editingSchoolId ? "Save Changes" : "Save School"}
             </button>
 
@@ -297,7 +296,7 @@ function Schools() {
                   <td className="px-5 py-4">{school.region}</td>
                   <td className="px-5 py-4">{school.contact}</td>
                   <td className="px-5 py-4">
-                    <span className="rounded-full bg-emerald-50 px-3 py-1 text-xs font-semibold text-emerald-700">
+                    <span className="rounded-full bg-[#D6A51E]/15 px-3 py-1 text-xs font-semibold text-[#0B2545]">
                       {school.status}
                     </span>
                   </td>

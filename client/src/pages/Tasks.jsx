@@ -1,5 +1,7 @@
 import { useEffect, useState } from "react";
 
+const API_URL = "https://veritas-outreach-api.onrender.com";
+
 function Tasks() {
   const [tasks, setTasks] = useState([]);
   const [showForm, setShowForm] = useState(false);
@@ -16,7 +18,7 @@ function Tasks() {
 
   async function loadTasks() {
     try {
-      const response = await fetch("http://localhost:5000/api/tasks");
+      const response = await fetch(`${API_URL}/api/tasks`);
       const data = await response.json();
 
       setTasks(data);
@@ -72,16 +74,13 @@ function Tasks() {
 
     try {
       if (editingTaskId) {
-        const response = await fetch(
-          `http://localhost:5000/api/tasks/${editingTaskId}`,
-          {
-            method: "PATCH",
-            headers: {
-              "Content-Type": "application/json",
-            },
-            body: JSON.stringify(formData),
-          }
-        );
+        const response = await fetch(`${API_URL}/api/tasks/${editingTaskId}`, {
+          method: "PATCH",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify(formData),
+        });
 
         const updatedTask = await response.json();
 
@@ -95,7 +94,7 @@ function Tasks() {
         return;
       }
 
-      const response = await fetch("http://localhost:5000/api/tasks", {
+      const response = await fetch(`${API_URL}/api/tasks`, {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
@@ -115,12 +114,9 @@ function Tasks() {
 
   async function completeTask(taskId) {
     try {
-      const response = await fetch(
-        `http://localhost:5000/api/tasks/${taskId}/complete`,
-        {
-          method: "PATCH",
-        }
-      );
+      const response = await fetch(`${API_URL}/api/tasks/${taskId}/complete`, {
+        method: "PATCH",
+      });
 
       const updatedTask = await response.json();
 
@@ -144,7 +140,7 @@ function Tasks() {
     }
 
     try {
-      await fetch(`http://localhost:5000/api/tasks/${taskId}`, {
+      await fetch(`${API_URL}/api/tasks/${taskId}`, {
         method: "DELETE",
       });
 
@@ -160,11 +156,11 @@ function Tasks() {
     <section className="px-6 py-8">
       <div className="flex flex-col justify-between gap-4 md:flex-row md:items-center">
         <div>
-          <p className="text-sm font-semibold uppercase tracking-wide text-emerald-700">
+          <p className="text-sm font-semibold uppercase tracking-wide text-[#D6A51E]">
             Outreach Workflows
           </p>
 
-          <h2 className="mt-2 text-3xl font-bold">Tasks</h2>
+          <h2 className="mt-2 text-3xl font-bold text-[#0B2545]">Tasks</h2>
 
           <p className="mt-2 text-slate-600">
             Coordinate follow-ups, workshops, sponsor reports, and school visits.
@@ -179,7 +175,7 @@ function Tasks() {
               setShowForm(true);
             }
           }}
-          className="rounded-xl bg-emerald-600 px-4 py-2 text-sm font-semibold text-white"
+          className="rounded-xl bg-[#0B2545] px-4 py-2 text-sm font-semibold text-white hover:bg-[#12355B]"
         >
           {showForm ? "Close Form" : "Add Task"}
         </button>
@@ -190,7 +186,7 @@ function Tasks() {
           onSubmit={handleSubmit}
           className="mt-8 rounded-2xl bg-white p-6 shadow-sm"
         >
-          <h3 className="text-xl font-semibold">
+          <h3 className="text-xl font-semibold text-[#0B2545]">
             {editingTaskId ? "Edit Task" : "Add New Task"}
           </h3>
 
@@ -202,7 +198,7 @@ function Tasks() {
                 value={formData.title}
                 onChange={handleChange}
                 required
-                className="mt-2 w-full rounded-xl border border-slate-200 px-4 py-2 outline-none focus:border-emerald-500"
+                className="mt-2 w-full rounded-xl border border-slate-200 px-4 py-2 outline-none focus:border-[#D6A51E]"
                 placeholder="Example: Send sponsor update report"
               />
             </label>
@@ -214,7 +210,7 @@ function Tasks() {
                 value={formData.owner}
                 onChange={handleChange}
                 required
-                className="mt-2 w-full rounded-xl border border-slate-200 px-4 py-2 outline-none focus:border-emerald-500"
+                className="mt-2 w-full rounded-xl border border-slate-200 px-4 py-2 outline-none focus:border-[#D6A51E]"
                 placeholder="Example: Outreach Team"
               />
             </label>
@@ -225,7 +221,7 @@ function Tasks() {
                 name="priority"
                 value={formData.priority}
                 onChange={handleChange}
-                className="mt-2 w-full rounded-xl border border-slate-200 px-4 py-2 outline-none focus:border-emerald-500"
+                className="mt-2 w-full rounded-xl border border-slate-200 px-4 py-2 outline-none focus:border-[#D6A51E]"
               >
                 <option>Low</option>
                 <option>Medium</option>
@@ -239,7 +235,7 @@ function Tasks() {
                 name="status"
                 value={formData.status}
                 onChange={handleChange}
-                className="mt-2 w-full rounded-xl border border-slate-200 px-4 py-2 outline-none focus:border-emerald-500"
+                className="mt-2 w-full rounded-xl border border-slate-200 px-4 py-2 outline-none focus:border-[#D6A51E]"
               >
                 <option>To Do</option>
                 <option>In Progress</option>
@@ -256,13 +252,13 @@ function Tasks() {
                 onChange={handleChange}
                 required
                 type="date"
-                className="mt-2 w-full rounded-xl border border-slate-200 px-4 py-2 outline-none focus:border-emerald-500"
+                className="mt-2 w-full rounded-xl border border-slate-200 px-4 py-2 outline-none focus:border-[#D6A51E]"
               />
             </label>
           </div>
 
           <div className="mt-5 flex gap-3">
-            <button className="rounded-xl bg-slate-900 px-4 py-2 text-sm font-semibold text-white">
+            <button className="rounded-xl bg-[#0B2545] px-4 py-2 text-sm font-semibold text-white">
               {editingTaskId ? "Save Changes" : "Save Task"}
             </button>
 
@@ -292,7 +288,9 @@ function Tasks() {
             >
               <div className="flex flex-col justify-between gap-4 md:flex-row md:items-center">
                 <div>
-                  <h3 className="text-lg font-bold">{task.title}</h3>
+                  <h3 className="text-lg font-bold text-[#0B2545]">
+                    {task.title}
+                  </h3>
 
                   <p className="mt-1 text-sm text-slate-500">
                     Owner: {task.owner} · Due:{" "}
@@ -301,7 +299,7 @@ function Tasks() {
                 </div>
 
                 <div className="flex flex-wrap gap-2">
-                  <span className="rounded-full bg-orange-50 px-3 py-1 text-xs font-semibold text-orange-700">
+                  <span className="rounded-full bg-[#D6A51E]/15 px-3 py-1 text-xs font-semibold text-[#0B2545]">
                     {task.priority}
                   </span>
 
@@ -319,7 +317,7 @@ function Tasks() {
                   {task.status !== "Completed" && (
                     <button
                       onClick={() => completeTask(task.id)}
-                      className="rounded-full bg-emerald-600 px-3 py-1 text-xs font-semibold text-white"
+                      className="rounded-full bg-[#0B2545] px-3 py-1 text-xs font-semibold text-white"
                     >
                       Mark Complete
                     </button>

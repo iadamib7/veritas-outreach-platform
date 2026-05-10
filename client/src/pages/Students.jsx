@@ -1,5 +1,7 @@
 import { useEffect, useState } from "react";
 
+const API_URL = "https://veritas-outreach-api.onrender.com";
+
 function Students() {
   const [students, setStudents] = useState([]);
   const [showForm, setShowForm] = useState(false);
@@ -17,8 +19,7 @@ function Students() {
 
   async function loadStudents() {
     try {
-      const response = await fetch("http://localhost:5000/api/students");
-
+      const response = await fetch(`${API_URL}/api/students`);
       const data = await response.json();
 
       setStudents(data);
@@ -76,16 +77,13 @@ function Students() {
 
     try {
       if (editingStudentId) {
-        const response = await fetch(
-          `http://localhost:5000/api/students/${editingStudentId}`,
-          {
-            method: "PATCH",
-            headers: {
-              "Content-Type": "application/json",
-            },
-            body: JSON.stringify(formData),
-          }
-        );
+        const response = await fetch(`${API_URL}/api/students/${editingStudentId}`, {
+          method: "PATCH",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify(formData),
+        });
 
         const updatedStudent = await response.json();
 
@@ -99,7 +97,7 @@ function Students() {
         return;
       }
 
-      const response = await fetch("http://localhost:5000/api/students", {
+      const response = await fetch(`${API_URL}/api/students`, {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
@@ -127,7 +125,7 @@ function Students() {
     }
 
     try {
-      await fetch(`http://localhost:5000/api/students/${studentId}`, {
+      await fetch(`${API_URL}/api/students/${studentId}`, {
         method: "DELETE",
       });
 
@@ -143,11 +141,11 @@ function Students() {
     <section className="px-6 py-8">
       <div className="flex flex-col justify-between gap-4 md:flex-row md:items-center">
         <div>
-          <p className="text-sm font-semibold uppercase tracking-wide text-emerald-700">
+          <p className="text-sm font-semibold uppercase tracking-wide text-[#D6A51E]">
             Engagement Tracking
           </p>
 
-          <h2 className="mt-2 text-3xl font-bold">Students</h2>
+          <h2 className="mt-2 text-3xl font-bold text-[#0B2545]">Students</h2>
 
           <p className="mt-2 text-slate-600">
             Monitor participation, program involvement, and sponsor status.
@@ -162,7 +160,7 @@ function Students() {
               setShowForm(true);
             }
           }}
-          className="rounded-xl bg-emerald-600 px-4 py-2 text-sm font-semibold text-white"
+          className="rounded-xl bg-[#0B2545] px-4 py-2 text-sm font-semibold text-white hover:bg-[#12355B]"
         >
           {showForm ? "Close Form" : "Add Student"}
         </button>
@@ -173,7 +171,7 @@ function Students() {
           onSubmit={handleSubmit}
           className="mt-8 rounded-2xl bg-white p-6 shadow-sm"
         >
-          <h3 className="text-xl font-semibold">
+          <h3 className="text-xl font-semibold text-[#0B2545]">
             {editingStudentId ? "Edit Student" : "Add New Student"}
           </h3>
 
@@ -185,7 +183,7 @@ function Students() {
                 value={formData.name}
                 onChange={handleChange}
                 required
-                className="mt-2 w-full rounded-xl border border-slate-200 px-4 py-2 outline-none focus:border-emerald-500"
+                className="mt-2 w-full rounded-xl border border-slate-200 px-4 py-2 outline-none focus:border-[#D6A51E]"
                 placeholder="Example: Kojo Appiah"
               />
             </label>
@@ -197,7 +195,7 @@ function Students() {
                 value={formData.schoolName}
                 onChange={handleChange}
                 required
-                className="mt-2 w-full rounded-xl border border-slate-200 px-4 py-2 outline-none focus:border-emerald-500"
+                className="mt-2 w-full rounded-xl border border-slate-200 px-4 py-2 outline-none focus:border-[#D6A51E]"
                 placeholder="Example: Kumasi High School"
               />
             </label>
@@ -209,7 +207,7 @@ function Students() {
                 value={formData.program}
                 onChange={handleChange}
                 required
-                className="mt-2 w-full rounded-xl border border-slate-200 px-4 py-2 outline-none focus:border-emerald-500"
+                className="mt-2 w-full rounded-xl border border-slate-200 px-4 py-2 outline-none focus:border-[#D6A51E]"
                 placeholder="Example: STEM Mentorship"
               />
             </label>
@@ -220,7 +218,7 @@ function Students() {
                 name="sponsorStatus"
                 value={formData.sponsorStatus}
                 onChange={handleChange}
-                className="mt-2 w-full rounded-xl border border-slate-200 px-4 py-2 outline-none focus:border-emerald-500"
+                className="mt-2 w-full rounded-xl border border-slate-200 px-4 py-2 outline-none focus:border-[#D6A51E]"
               >
                 <option>Pending</option>
                 <option>Sponsored</option>
@@ -237,7 +235,7 @@ function Students() {
                 required
                 type="number"
                 min="0"
-                className="mt-2 w-full rounded-xl border border-slate-200 px-4 py-2 outline-none focus:border-emerald-500"
+                className="mt-2 w-full rounded-xl border border-slate-200 px-4 py-2 outline-none focus:border-[#D6A51E]"
                 placeholder="Example: 8"
               />
             </label>
@@ -252,14 +250,14 @@ function Students() {
                 type="number"
                 min="0"
                 max="100"
-                className="mt-2 w-full rounded-xl border border-slate-200 px-4 py-2 outline-none focus:border-emerald-500"
+                className="mt-2 w-full rounded-xl border border-slate-200 px-4 py-2 outline-none focus:border-[#D6A51E]"
                 placeholder="Example: 86"
               />
             </label>
           </div>
 
           <div className="mt-5 flex gap-3">
-            <button className="rounded-xl bg-slate-900 px-4 py-2 text-sm font-semibold text-white">
+            <button className="rounded-xl bg-[#0B2545] px-4 py-2 text-sm font-semibold text-white">
               {editingStudentId ? "Save Changes" : "Save Student"}
             </button>
 
@@ -289,14 +287,16 @@ function Students() {
             >
               <div className="flex items-start justify-between gap-4">
                 <div>
-                  <h3 className="text-lg font-bold">{student.name}</h3>
+                  <h3 className="text-lg font-bold text-[#0B2545]">
+                    {student.name}
+                  </h3>
 
                   <p className="mt-1 text-sm text-slate-500">
                     {student.schoolName}
                   </p>
                 </div>
 
-                <span className="rounded-full bg-blue-50 px-3 py-1 text-xs font-semibold text-blue-700">
+                <span className="rounded-full bg-[#D6A51E]/15 px-3 py-1 text-xs font-semibold text-[#0B2545]">
                   {student.sponsorStatus}
                 </span>
               </div>
@@ -307,7 +307,7 @@ function Students() {
                 <div className="rounded-xl bg-slate-50 p-3">
                   <p className="text-xs text-slate-500">Attendance</p>
 
-                  <p className="mt-1 text-xl font-bold">
+                  <p className="mt-1 text-xl font-bold text-[#0B2545]">
                     {student.attendance}
                   </p>
                 </div>
@@ -315,7 +315,7 @@ function Students() {
                 <div className="rounded-xl bg-slate-50 p-3">
                   <p className="text-xs text-slate-500">Engagement</p>
 
-                  <p className="mt-1 text-xl font-bold">
+                  <p className="mt-1 text-xl font-bold text-[#0B2545]">
                     {student.engagementScore}%
                   </p>
                 </div>

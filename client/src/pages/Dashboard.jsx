@@ -2,7 +2,9 @@ import { useEffect, useState } from "react";
 import { io } from "socket.io-client";
 import veritasLogo from "../assets/veritas-logo.jpeg";
 
-const socket = io("http://localhost:5000");
+const API_URL = "https://veritas-outreach-api.onrender.com";
+
+const socket = io(API_URL);
 
 function Dashboard() {
   const [stats, setStats] = useState({
